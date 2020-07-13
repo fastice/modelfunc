@@ -77,8 +77,8 @@ class argusMesh:
                 nodeIndex += 1
                 nodesRead += 1  # Increment node counter
                 if nodesRead == nNewNodes:
-                    print(f'Read {nodesRead} nodes')
-                    print(f'Node on boundary {np.sum(self.nodeOnBoundary)}')
+                    # print(f'Read {nodesRead} nodes')
+                    # print(f'Node on boundary {np.sum(self.nodeOnBoundary)}')
                     self.nNodes += nodesRead
                     self.nodes = np.array(self.nodes)
                     self.nodeOnBoundary = np.array(self.nodeOnBoundary)
@@ -103,7 +103,7 @@ class argusMesh:
                 elementsRead += 1
                 elementIndex += 1
                 if elementsRead == nNewElements:
-                    print(f'Read {elementsRead} elements')
+                    # print(f'Read {elementsRead} elements')
                     self.nElements += elementsRead
                     self.elements = np.array(self.elements)
                     return elementsRead
@@ -122,7 +122,7 @@ class argusMesh:
         nNewNodes, nNewElements = self.parseHeader(fpExp)
         nodesRead = self.parseNodes(fpExp, nNewNodes)
         elementsRead = self.parseElements(fpExp, nNewElements)
-        print(nodesRead, self.nNodes, elementsRead, self.nElements)
+        # print(nodesRead, self.nNodes, elementsRead, self.nElements)
         fpExp.close()
         return
 
@@ -156,7 +156,7 @@ class argusMesh:
         n0 = nIndex[0]
         nLast = n0
         # Loop to find nearest node and form segments
-        print(np.sum(bNotUsed))
+        # (np.sum(bNotUsed))
         while np.sum(bNotUsed) > 0:
             n0 = self.findNearest(self.nodes[n0], bNodes, bNotUsed, nIndex,
                                   bIndex)
@@ -184,7 +184,7 @@ class argusMesh:
                     self.nodes[self.shelfFrontNode, 1], 'b.')
         for myEl, onBoundary in zip(self.elements, self.elOnBoundary):
             if onBoundary:
-                print(myEl)
+                # print(myEl)
                 xy = self.nodes[myEl, :]
                 ax.plot(xy[:, 0], xy[:, 1], 'g-')
 
@@ -202,7 +202,7 @@ class argusMesh:
 
     def writeGmshSegments(self, fpGmsh):
         ''' write segments as 1-d nodes'''
-        print(len(self.segments))
+        # print(len(self.segments))
         nSegments = len(self.segments)
         for seg, i in zip(self.segments, range(0, nSegments)):
             print(f'{i:8} {1:3} {2:3} {seg["type"]:4} {i+1:6} '

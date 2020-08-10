@@ -3,7 +3,7 @@ from utilities import myerror
 import os
 
 
-def getCheckPointVars(checkFile, varNames, Q):
+def getCheckPointVars(checkFile, varNames, Q, t=None):
     """Read a variable from a firedrake checkpoint file 
 
     Parameters
@@ -27,9 +27,13 @@ def getCheckPointVars(checkFile, varNames, Q):
     if not os.path.exists(f'{checkFile}.h5'):
         myerror(f'getCheckPointVar: file {checkFile} does not exist')
     with firedrake.DumbCheckpoint(checkFile, mode=firedrake.FILE_READ) as chk:
+        if t is not None:
+            print(t)
+            chk.set_timestep(t)
         for varName in varNames:
             print(varName)
             myVar = firedrake.Function(Q, name=varName)
             chk.load(myVar, name=varName)
             myVars[varName] = myVar
+            print(myVar)
     return myVars

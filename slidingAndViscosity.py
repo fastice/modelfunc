@@ -3,7 +3,7 @@ import icepack
 from icepack.constants import weertman_sliding_law as m
 
 
-def viscosity(u, h, grounded, floating, A, theta):
+def viscosityTheta(u, h, grounded, floating, A, theta):
     """Combine existing A on grounded ice with theta^2 from floating ice.
     Parameters
     ----------
@@ -25,8 +25,9 @@ def viscosity(u, h, grounded, floating, A, theta):
         Viscosity funciton for model
     """
     # A = grounded * A + floating * theta**2
-    A = grounded * A + floating * firedrake.exp(theta)
-    return icepack.models.viscosity.viscosity_depth_averaged(u, h, A)
+    A0 = grounded * A + floating * firedrake.exp(theta)
+    # A 0 = firedrake.max_value(firedrake.min_value(A0, 1.), 100.)
+    return icepack.models.viscosity.viscosity_depth_averaged(u, h, A0)
 
 
 def weertmanFriction(u, grounded, beta, uThresh):

@@ -7,6 +7,8 @@ from modelfunc import firedrakeSmooth, flotationMask, flotationHeight
 from icepack.constants import ice_density as rhoI, water_density as rhoW
 import os
 
+rhoW = rhoI * 1028./917.  # This ensures rhoW based on 1028
+
 
 def getModelGeometry(geometryFile, Q, smooth=False, alpha=2e3, zFirn=14.,
                      rhoI=rhoI, rhoW=rhoW):
@@ -61,10 +63,10 @@ def getModelGeometry(geometryFile, Q, smooth=False, alpha=2e3, zFirn=14.,
         fd['floatMask'], g = flotationMask(fd['surface'], zF, Q, rhoI=rhoI,
                                            rhoW=rhoW)
     else:
-        g = icepack.interpolate(not fd['floatMask'], Q)
+        g = icepack.interpolate(fd['floatMask'] < 1, Q)
     # Don't allow negative values
     for myVar in ['surface', 'thickness']:
-        fd[myVar] = icepack.interpolate(firedrake.max_value(1, fd[myVar]), Q)
+        fd[myVar] = icepack.interpolate(firedrake.max_value(10, fd[myVar]), Q)
     for myVar in geom:
         print(f'{myVar} min/max {fd[myVar].dat.data_ro.min():10.2f} '
               f'{fd[myVar].dat.data_ro.max():10.2f}')

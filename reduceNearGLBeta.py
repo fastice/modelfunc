@@ -2,7 +2,7 @@ import icepack
 import firedrake
 
 
-def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh):
+def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
     """Compute beta reduction in area near grounding line where the height
     above floation is less than thresh.
 
@@ -32,7 +32,9 @@ def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh):
     # Inverse mask
     sMaskInv = sMask < 1
     # scale = fraction of of original height above flotation
-    scaleBeta = sAbove/firedrake.min_value(thresh, sAboveOrig)
+    scaleBeta = sAbove/firedrake.max_value(firedrake.min_value(thresh, sAboveOrig), 5)
+    if limit: 
+        scaleBeta = firedrake.min_value(3, scaleBeta)
     scaleBeta = scaleBeta * sMask + sMaskInv
     # scaleBeta = icepack.interpolate(firedrake.min_value(scaleBeta,1.),Q)
     # sqrt so tau = scale * beta^2

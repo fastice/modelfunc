@@ -4,7 +4,7 @@ import os
 
 
 def getCheckPointVars(checkFile, varNames, Q, t=None):
-    """Read a variable from a firedrake checkpoint file 
+    """ Read a variable from a firedrake checkpoint file
 
     Parameters
     ----------
@@ -18,22 +18,20 @@ def getCheckPointVars(checkFile, varNames, Q, t=None):
     -------
     myVars: dict
         {'myVar':}
-    """    
+    """
     # Ensure a list since a single str is allowed
     if type(varNames) is not list:
         varNames = [varNames]
     # open checkpoint
     myVars = {}
     if not os.path.exists(f'{checkFile}.h5'):
-        myerror(f'getCheckPointVar: file {checkFile} does not exist')
+        myerror(f'getCheckPointVar: file {checkFile}.h5 does not exist')
     with firedrake.DumbCheckpoint(checkFile, mode=firedrake.FILE_READ) as chk:
         if t is not None:
             print(t)
             chk.set_timestep(t)
         for varName in varNames:
-            print(varName)
             myVar = firedrake.Function(Q, name=varName)
             chk.load(myVar, name=varName)
             myVars[varName] = myVar
-            print(myVar)
     return myVars

@@ -30,11 +30,11 @@ def viscosityTheta(u, h, grounded, floating, A, theta):
     return icepack.models.viscosity.viscosity_depth_averaged(u, h, A0)
 
 
-def weertmanFriction(u, grounded, beta, uThresh):
+def weertmanFriction(velocity, grounded, beta, uThresh):
     """Friction coefficient for weertman sliding law
     Parameters
     ----------
-    u : firedrake function
+    velocity : firedrake function
         modelled velocity
     grounded : firedrake function
         Mask with 1s for grounded 0 for floating.
@@ -47,15 +47,15 @@ def weertmanFriction(u, grounded, beta, uThresh):
         Bed friction model
     """
     C = grounded * beta**2
-    return icepack.models.friction.bed_friction(u=u, C=C)
+    return icepack.models.friction.bed_friction(velocity=velocity, C=C)
 
 
 # Note m is a global variable
-def schoofFriction(u, grounded, beta, uThresh):
+def schoofFriction(velocity, grounded, beta, uThresh):
     """Friction coefficient for regularized coloumb (Schoof) sliding law
     Parameters
     ----------
-    u : firedrake function
+    velocity : firedrake function
         modelled velocity
     grounded : firedrake function
         Mask with 1s for grounded 0 for floating.
@@ -69,6 +69,6 @@ def schoofFriction(u, grounded, beta, uThresh):
         Bed friction model
     """
     C = grounded * beta**2
-    mExp = (1/m + 1)
-    U = firedrake.sqrt(firedrake.inner(u, u))
-    return C * (uThresh**mExp + U**mExp)**(m/(m+1))
+    mExp = (1./m + 1.)
+    U = firedrake.sqrt(firedrake.inner(velocity, velocity))
+    return C * ((uThresh**mExp + U**mExp)**(m/(m+1.)) - uThresh)

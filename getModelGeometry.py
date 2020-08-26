@@ -4,13 +4,13 @@ import firedrake
 import yaml
 import utilities as u
 from modelfunc import firedrakeSmooth, flotationMask, flotationHeight
-from icepack.constants import ice_density as rhoI, water_density as rhoW
+from icepack.constants import ice_density as rhoI
 import os
 
 rhoW = rhoI * 1028./917.  # This ensures rhoW based on 1028
 
 
-def getModelGeometry(geometryFile, Q, smooth=False, alpha=2e3, zFirn=14.,
+def getModelGeometry(geometryFile, Q, smooth=False, alpha=2e3, zFirn=0.,
                      rhoI=rhoI, rhoW=rhoW):
     """Load geometry data for model and create firedrake interpolators
     Parameters
@@ -85,7 +85,7 @@ def getModelVarFromTiff(myTiff, Q):
     -------
     firedrake function
         Data from tiff
-    """    
+    """
     if not os.path.exists(myTiff):
         u.myerror(f'Geometry file {myTiff} does not exist')
     x = rasterio.open(myTiff)

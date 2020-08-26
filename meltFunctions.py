@@ -5,6 +5,7 @@ import icepack
 from modelfunc.firedrakeSmooth import firedrakeSmooth
 import os
 
+
 def inputMeltParams(meltParams):
     """Read parameters for melt models
     Parameters
@@ -13,7 +14,7 @@ def inputMeltParams(meltParams):
         yaml file with melt params for various models
     """
     if not os.path.exists(meltParams):
-        myerror(f'inputMeltParams: meltParams file - {meltParams} - not found.')
+        myerror(f'inputMeltParams: meltParams file ({meltParams}) not found.')
     with open(meltParams, 'r') as fp:
         meltParams = yaml.load(fp, Loader=yaml.FullLoader)
     return meltParams
@@ -44,12 +45,16 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
             tmpMelt = tmpMelt + poly['coeff'][j] * h**j
         melt = melt + tmpMelt * (h > poly['min']) * (h < poly['max'])
     # Smooth result
-    melt1 = icepack.interpolate(melt * floating, Q)
-    melt1 = firedrakeSmooth(melt1, alpha=4000)
+    # melt1 = icepack.interpolate(melt * floating, Q)
+    alpha = 4000  # Default
+    if 'alpha' in meltParams:
+        alpha = meltParams['alpha']
+    melt1 = icepack.interpolate(melt, Q)
+    melt1 = firedrakeSmooth(melt1, alpha=alpha)
     # 'totalMelt' given renormalize melt to produce this value
     if 'totalMelt' in meltParams.keys():
         intMelt = firedrake.assemble(melt1 * floating * firedrake.dx)
-        scale = firedrake.Constant(-1.0 * float(meltParams['totalMelt']) / 
+        scale = firedrake.Constant(-1.0 * float(meltParams['totalMelt']) /
                                    float(intMelt))
     else:
         scale = firedrake.Constant(1.)
@@ -75,15 +80,16 @@ def divMelt(h, floating, meltParams, u, Q):
     firedrake function
         melt rates
     """
-    
+
     flux = u * h
     fluxDiv = icepack.interpolate(firedrake.div(flux), Q)
     fluxDivS = firedrakeSmooth(fluxDiv, alpha=8000)
-    fluxDivS = firedrake.min_value(fluxDivS * floating * meltParams['meltMask'], 0)
+    fluxDivS = firedrake.min_value(fluxDivS * floating *
+                                   meltParams['meltMask'], 0)
     intFluxDiv = firedrake.assemble(fluxDivS * firedrake.dx)
     scale = -1.0 * float(meltParams['intMelt']) / float(intFluxDiv)
     scale = firedrake.Constant(scale)
     melt = icepack.interpolate(firedrake.min_value(fluxDivS * scale,
                                                    meltParams['maxMelt']), Q)
-    
+
     return melt

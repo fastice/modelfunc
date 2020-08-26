@@ -25,7 +25,7 @@ def argusToFiredrakeMesh(meshFile, savegmsh=False):
         u.myerror(f'Invalid mesh file [{meshFile}]: missing .exp')
     # create unique ide to avoid multiple jobs overwriting
     myId = f'.{uuid.uuid4().hex[:8]}.msh'
-    gmshFile = meshFile.replace(".exp",myId)
+    gmshFile = meshFile.replace(".exp", myId)
     myMesh.toGmsh(gmshFile)  # Save in gmsh format
     mesh = firedrake.Mesh(gmshFile)
     # delete gmsh file
@@ -46,15 +46,15 @@ def readOpts(meshFile):
     ----------
     opts: dict
         opts data
-    """ 
-    optsFile = meshFile.replace('.exp','.yaml')
+    """
+    optsFile = meshFile.replace('.exp', '.yaml')
     if not os.path.exists(optsFile):
         return {}
     with open(optsFile, 'r') as fp:
-        try: 
+        try:
             opts = yaml.load(fp, Loader=yaml.FullLoader)
         except Exception:
-            myerror(f'Error reading opts file: {optsFile}')
+            u.myerror(f'Error reading opts file: {optsFile}')
     if 'opts' in opts:
         opts = opts['opts']
     return opts

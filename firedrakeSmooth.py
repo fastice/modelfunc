@@ -10,8 +10,8 @@ def firedrakeSmooth(q0, alpha=2e3):
     q0 : firedrake function
         firedrake function to be smooth
     alpha : float, optional
-        parameter that controls the amount of smoothing, which is approximately 
-        the smoothing lengthscale in m, by default 2e3
+        parameter that controls the amount of smoothing, which is
+        approximately the smoothing lengthscale in m, by default 2e3
     Returns
     -------
     q firedrake interp function

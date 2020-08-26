@@ -1,5 +1,7 @@
 import firedrake
 from icepack.constants import ice_density as rhoI, water_density as rhoW
+from modelfunc import firedrakeSmooth
+import icepack
 
 
 def flotationMask(s, zF, Q, rhoI=rhoI, rhoW=rhoW):
@@ -22,6 +24,7 @@ def flotationMask(s, zF, Q, rhoI=rhoI, rhoW=rhoW):
     grounded firedrake interp function
         Grounded mask 1 grounded, 0 floating
     """
-    floating = firedrake.interpolate(s <= zF, Q)
-    grounded = firedrake.interpolate(s > zF, Q)
+    zAbove = firedrakeSmooth(icepack.interpolate(s - zF, Q), alpha=100)
+    floating = icepack.interpolate(zAbove < 0, Q)
+    grounded = icepack.interpolate(zAbove > 0, Q)
     return floating, grounded

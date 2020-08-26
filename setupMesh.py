@@ -19,7 +19,7 @@ def setupMesh(meshFile, degree=2):
         firedrake mesh
     Q, V
         firedrake scalar and vectory functions
-    """    
+    """
     # Input the mesh
     mesh, opts = argusToFiredrakeMesh(meshFile)
     # Create scalar and vector function spaces

@@ -22,7 +22,7 @@ def inputMeltParams(meltParams):
 
 def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
     """ Melt function that is described piecewise by set of polynomials
-
+    Melt is in units of m/yr w.e.
     Parameters
     ----------
     h : firedrake function
@@ -45,11 +45,20 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
             tmpMelt = tmpMelt + poly['coeff'][j] * h**j
         melt = melt + tmpMelt * (h > poly['min']) * (h < poly['max'])
     # Smooth result
-    # melt1 = icepack.interpolate(melt * floating, Q)
     alpha = 4000  # Default
     if 'alpha' in meltParams:
         alpha = meltParams['alpha']
-    melt1 = icepack.interpolate(melt, Q)
+    #
+    # if filterWithFloatMask apply float mask before filter, which will shift
+    # melt distribution up in the column. If filter applied afterwards, it
+    # will be concentrated nearer the GL.
+    filterWithFloatMask = False
+    if 'filterWithFloatMask' in meltParams:
+        filterWithFloatMask = meltParams['filterWithFloatMask']
+    if filterWithFloatMask:
+        melt1 = icepack.interpolate(melt * floating, Q)
+    else:
+        melt1 = icepack.interpolate(melt, Q)
     melt1 = firedrakeSmooth(melt1, alpha=alpha)
     # 'totalMelt' given renormalize melt to produce this value
     if 'totalMelt' in meltParams.keys():
@@ -80,7 +89,6 @@ def divMelt(h, floating, meltParams, u, Q):
     firedrake function
         melt rates
     """
-
     flux = u * h
     fluxDiv = icepack.interpolate(firedrake.div(flux), Q)
     fluxDivS = firedrakeSmooth(fluxDiv, alpha=8000)

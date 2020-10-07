@@ -44,7 +44,7 @@ def getInversionData(inversionCheckpointFile, Q, V):
     uInv: firedrake
         velocity solution from inversion
     uObsInv: firedrake
-        observed velocity used to constrain inverion
+        observed velocity used to constrain inversion
     '''
     #
     inversionData = ['betaInv', 'thetaInv', 'AInv', 'sInv', 'hInv', 'zbInv',

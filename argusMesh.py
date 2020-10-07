@@ -117,7 +117,8 @@ class argusMesh:
         try:  # open file
             fpExp = open(expFile, 'r')
         except Exception:
-            myerror('argusMesh.readExp: could not open meshfile for read')
+            myerror(f'argusMesh.readExp: could not open meshfile {expFile} '
+                    'for read')
         #
         nNewNodes, nNewElements = self.parseHeader(fpExp)
         nodesRead = self.parseNodes(fpExp, nNewNodes)

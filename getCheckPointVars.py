@@ -28,8 +28,10 @@ def getCheckPointVars(checkFile, varNames, Q, t=None):
         myerror(f'getCheckPointVar: file {checkFile}.h5 does not exist')
     with firedrake.DumbCheckpoint(checkFile, mode=firedrake.FILE_READ) as chk:
         if t is not None:
-            print(t)
-            chk.set_timestep(t)
+            # note this only works for integer years
+            tt, ii = chk.get_timesteps()
+            # print(tt[-1], ii[-1], len(tt))
+            chk.set_timestep(t, idx=int(t-1))
         for varName in varNames:
             myVar = firedrake.Function(Q, name=varName)
             chk.load(myVar, name=varName)

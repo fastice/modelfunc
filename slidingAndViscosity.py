@@ -27,7 +27,9 @@ def viscosityTheta(u, h, grounded, floating, A, theta):
     # A = grounded * A + floating * theta**2
     A0 = grounded * A + floating * firedrake.exp(theta)
     # A 0 = firedrake.max_value(firedrake.min_value(A0, 1.), 100.)
-    return icepack.models.viscosity.viscosity_depth_averaged(u, h, A0)
+    return icepack.models.viscosity.viscosity_depth_averaged(velocity=u,
+                                                             thickness=h,
+                                                             fluidity=A0)
 
 
 def weertmanFriction(velocity, grounded, beta, uThresh):
@@ -47,7 +49,7 @@ def weertmanFriction(velocity, grounded, beta, uThresh):
         Bed friction model
     """
     C = grounded * beta**2
-    return icepack.models.friction.bed_friction(velocity=velocity, C=C)
+    return icepack.models.friction.bed_friction(velocity=velocity, friction=C)
 
 
 # Note m is a global variable

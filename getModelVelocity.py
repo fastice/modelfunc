@@ -6,6 +6,7 @@ import rasterio
 import os
 from modelfunc import firedrakeSmooth
 
+
 def getModelVelocity(baseName, Q, V, minSigma=5, maxSigma=100):
     """Read in a tiff velocity data set and return
     firedrake interpolate functions.

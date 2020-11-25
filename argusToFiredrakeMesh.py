@@ -31,6 +31,8 @@ def argusToFiredrakeMesh(meshFile, savegmsh=False):
     # delete gmsh file
     if not savegmsh:
         os.remove(gmshFile)
+    else:
+        os.rename(gmshFile, gmshFile.replace(myId, '.msh'))
     opts = readOpts(meshFile)
     # return mesh
     return mesh, opts

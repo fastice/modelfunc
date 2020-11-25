@@ -20,7 +20,7 @@ def inputMeltParams(meltParams):
     return meltParams
 
 
-def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
+def piecewiseWithDepth(h, floating, meltParams, Q, *argv, **kwargs):
     """ Melt function that is described piecewise by set of polynomials
     Melt is in units of m/yr w.e.
     Parameters
@@ -43,7 +43,9 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
         tmpMelt = firedrake.Constant(poly['coeff'][0])
         for j in range(1, poly['deg'] + 1):
             tmpMelt = tmpMelt + poly['coeff'][j] * h**j
-        melt = melt + tmpMelt * (h > poly['min']) * (h < poly['max'])
+        # Apply melt to all shelf ice (ice > 30 m)
+        melt = melt + tmpMelt * \
+            (h > max(poly['min'], 30.1)) * (h < poly['max'])
     # Smooth result
     alpha = 4000  # Default
     if 'alpha' in meltParams:
@@ -56,15 +58,21 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv):
     if 'filterWithFloatMask' in meltParams:
         filterWithFloatMask = meltParams['filterWithFloatMask']
     if filterWithFloatMask:
-        melt1 = icepack.interpolate(melt * floating, Q)
+        # Changed to avoid petsc memory issue on store
+        # melt1 = icepack.interpolate(melt * floating, Q)
+        melt1 = icepack.interpolate(melt, Q)
+        melt1 = icepack.interpolate(floating * melt1, Q)
     else:
         melt1 = icepack.interpolate(melt, Q)
     melt1 = firedrakeSmooth(melt1, alpha=alpha)
     # 'totalMelt' given renormalize melt to produce this value
     if 'totalMelt' in meltParams.keys():
+        trend = 0.
+        if 'trend' in kwargs.keys():
+            trend = kwargs['trend']
         intMelt = firedrake.assemble(melt1 * floating * firedrake.dx)
-        scale = firedrake.Constant(-1.0 * float(meltParams['totalMelt']) /
-                                   float(intMelt))
+        total = float(meltParams['totalMelt']) + trend
+        scale = firedrake.Constant(-1.0 * total/float(intMelt))
     else:
         scale = firedrake.Constant(1.)
     #

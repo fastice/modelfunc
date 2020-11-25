@@ -24,20 +24,25 @@ def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
     # compute original height above flotation for grounded region
     sAboveOrig = (sOrig - zF) * grounded
     # avoid negative/zero values
-    sAboveOrig = firedrake.max_value(sAboveOrig, 0.001)
+    sAboveOrig = firedrake.max_value(sAboveOrig, 0.0)
     # Current height above flotation with negative values zeroed out.
     sAbove = firedrake.max_value((s - zF) * grounded, 0)
     # mask so only areas less than thresh but grounded
-    sMask = (sAbove <= thresh) * grounded
+    sMask = (sAbove < thresh) * grounded
+    # print(f'{sAbove.dat.data_ro.min()}, {sAbove.dat.data_ro.max()} {thresh}')
     # Inverse mask
     sMaskInv = sMask < 1
-    # scale = fraction of of original height above flotation
+    # scale = fraction of original height above flotation
+    # Use 5 to avoid potentially large ratio at small values.
     scaleBeta = sAbove / \
-        firedrake.max_value(firedrake.min_value(thresh, sAboveOrig), 5)
+        firedrake.max_value(firedrake.min_value(thresh, sAboveOrig), 3)
     if limit:
         scaleBeta = firedrake.min_value(3, scaleBeta)
     scaleBeta = scaleBeta * sMask + sMaskInv
     # scaleBeta = icepack.interpolate(firedrake.min_value(scaleBeta,1.),Q)
     # sqrt so tau = scale * beta^2
-    scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta) * grounded, Q)
+    # scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta) * grounded, Q)
+    # Removed grounded above because grounded is always applied in friction
+    scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta), Q)
+    # print(f'{scaleBeta.dat.data_ro.min()}, {scaleBeta.dat.data_ro.max()}')
     return scaleBeta

@@ -3,7 +3,7 @@ import firedrake
 import utilities as u
 
 
-def setupMesh(meshFile, degree=2, meshOversample=None):
+def setupMesh(meshFile, degree=2, meshOversample=None, savegmsh=False):
     """
     Read argus mesh file and return mesh alongw ith function spaces
 
@@ -23,7 +23,7 @@ def setupMesh(meshFile, degree=2, meshOversample=None):
     """
     # Input the mesh
     maxOversample = 4  # Arbitrary could be increased
-    mesh, opts = argusToFiredrakeMesh(meshFile)
+    mesh, opts = argusToFiredrakeMesh(meshFile, savegmsh=savegmsh)
     if meshOversample is not None:
         numLevels = meshOversample - 1
         if numLevels < 0 or numLevels > (maxOversample-1):

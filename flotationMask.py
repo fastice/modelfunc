@@ -1,5 +1,5 @@
 from icepack.constants import ice_density as rhoI, water_density as rhoW
-from modelfunc import firedrakeSmooth
+from modelfunc.firedrakeSmooth import firedrakeSmooth
 import icepack
 
 

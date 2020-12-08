@@ -2,7 +2,7 @@ import rasterio
 import icepack
 import firedrake
 import yaml
-import utilities as u
+from modelfunc.myerror import myerror
 from modelfunc import firedrakeSmooth, flotationMask, flotationHeight
 from icepack.constants import ice_density as rhoI
 import os
@@ -46,7 +46,7 @@ def getModelGeometry(geometryFile, Q, smooth=False, alpha=2e3, zFirn=0.,
         with open(geometryFile) as fp:
             geom = yaml.load(fp, Loader=yaml.FullLoader)
     except Exception:
-        u.myerror(f'Could not open geomtery file: {geometryFile}')
+        myerror(f'Could not open geomtery file: {geometryFile}')
     # Load and convert to firedrake
     fd = {'bed': None, 'surface': None, 'thickness': None, 'floatMask': None}
     # Read and process data
@@ -87,6 +87,6 @@ def getModelVarFromTiff(myTiff, Q):
         Data from tiff
     """
     if not os.path.exists(myTiff):
-        u.myerror(f'Geometry file {myTiff} does not exist')
+        myerror(f'Geometry file {myTiff} does not exist')
     x = rasterio.open(myTiff)
     return icepack.interpolate(x, Q)

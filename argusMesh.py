@@ -4,18 +4,10 @@ Created on Wed Apr  4 14:33:23 2018
 
 @author: ian
 """
-# from utilities import myerror
-import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-def myerror(message, myLogger=None):
-    """ print error and exit """
-    print('\n\t\033[1;31m *** ', message, ' *** \033[0m\n')
-    if myLogger is not None:
-        myLogger.logError(message)
-    sys.exit()
+from modelfunc.myerror import myerror
 
 
 class argusMesh:
@@ -172,11 +164,13 @@ class argusMesh:
         return xmin, xmax, ymin, ymax
 
     def plotMesh(self, nodes=True, elements=True, nodeOnBoundary=True,
-                 shelfFrontNode=True):
+                 shelfFrontNode=True, ax=None):
         ''' plot mesh  - very slow mostly for debugging'''
-        fig, ax = plt.subplots(1, 1)
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
         # Plot nodes
-        ax.plot(self.nodes[1:, 0], self.nodes[1:, 1], 'k.')
+        if nodes:
+            ax.plot(self.nodes[1:, 0], self.nodes[1:, 1], 'k.')
         if nodeOnBoundary:
             ax.plot(self.nodes[self.nodeOnBoundary, 0],
                     self.nodes[self.nodeOnBoundary, 1], 'r.')

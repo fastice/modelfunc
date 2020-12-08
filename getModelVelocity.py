@@ -1,10 +1,9 @@
 import firedrake
 from firedrake import inner
 import icepack
-import utilities as u
 import rasterio
 import os
-from modelfunc import firedrakeSmooth
+from modelfunc import myerror
 
 
 def getModelVelocity(baseName, Q, V, minSigma=5, maxSigma=100):
@@ -44,7 +43,7 @@ def getModelVelocity(baseName, Q, V, minSigma=5, maxSigma=100):
     for suffix in suffixes:
         myBand = baseName.replace('*', suffix)
         if not os.path.exists(myBand):
-            u.myerror(f'Velocity/error file - {myBand} - does not exist')
+            myerror(f'Velocity/error file - {myBand} - does not exist')
         rasters[suffix] = rasterio.open(myBand, 'r')
     # Firedrake interpolators
     uObs = icepack.interpolate((rasters['vx'], rasters['vy']), V)

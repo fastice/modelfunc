@@ -1,4 +1,4 @@
-from utilities import myerror
+from modelfunc import myerror
 import yaml
 
 
@@ -28,7 +28,7 @@ def readModelParams(paramsFile, key=None):
     -------
     dict
         dict with model params with 'params' added as file it was read from.
-    """    
+    """
     if paramsFile is None:
         return {}
     try:
@@ -42,4 +42,3 @@ def readModelParams(paramsFile, key=None):
     except Exception:
         myerror(f'Could not open params file: {paramsFile}')
     return modelParams
-    

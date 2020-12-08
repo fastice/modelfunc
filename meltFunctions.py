@@ -1,5 +1,5 @@
 import yaml
-from utilities import myerror
+from modelfunc.myerror import myerror
 import firedrake
 import icepack
 from modelfunc.firedrakeSmooth import firedrakeSmooth

@@ -4,19 +4,11 @@ Created on Wed Apr  4 14:33:23 2018
 
 @author: ian
 """
-# from utilities import myerror
+from modelfunc import myerror
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
+
 elSize = {1: 2, 2: 3, 3: 4}
-
-
-def myerror(message, myLogger=None):
-    """ print error and exit """
-    print('\n\t\033[1;31m *** ', message, ' *** \033[0m\n')
-    if myLogger is not None:
-        myLogger.logError(message)
-    sys.exit()
 
 
 class gMesh:
@@ -181,6 +173,6 @@ class gMesh:
             if i == 1000 :
                  break
             #     print(myEl)
-            #     
+            #
             #     print(xy[:,0], xy[:,1])
         plt.show()

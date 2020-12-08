@@ -1,6 +1,5 @@
 import modelfunc as m
 import firedrake
-import utilities as u
 import uuid
 import os
 import yaml
@@ -22,7 +21,7 @@ def argusToFiredrakeMesh(meshFile, savegmsh=False):
     myMesh = m.argusMesh(meshFile)  # Input the mesh
     # Quick Check that file is a value argus mesh
     if '.exp' not in meshFile:
-        u.myerror(f'Invalid mesh file [{meshFile}]: missing .exp')
+        m.myerror(f'Invalid mesh file [{meshFile}]: missing .exp')
     # create unique ide to avoid multiple jobs overwriting
     myId = f'.{uuid.uuid4().hex[:8]}.msh'
     gmshFile = meshFile.replace(".exp", myId)
@@ -56,7 +55,7 @@ def readOpts(meshFile):
         try:
             opts = yaml.load(fp, Loader=yaml.FullLoader)
         except Exception:
-            u.myerror(f'Error reading opts file: {optsFile}')
+            m.myerror(f'Error reading opts file: {optsFile}')
     if 'opts' in opts:
         opts = opts['opts']
     return opts

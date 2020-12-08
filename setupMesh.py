@@ -1,6 +1,6 @@
 from modelfunc import argusToFiredrakeMesh
 import firedrake
-import utilities as u
+from modelfunc.myerror import myerror
 
 
 def setupMesh(meshFile, degree=2, meshOversample=None, savegmsh=False):
@@ -27,8 +27,8 @@ def setupMesh(meshFile, degree=2, meshOversample=None, savegmsh=False):
     if meshOversample is not None:
         numLevels = meshOversample - 1
         if numLevels < 0 or numLevels > (maxOversample-1):
-            u.myerror(f'meshOverample={meshOversample} but  0 < '
-                      'meshOversample < 4')
+            myerror(f'meshOverample={meshOversample} but  0 < '
+                    'meshOversample < 4')
         mesh = firedrake.MeshHierarchy(mesh, numLevels)[numLevels]
     # Create scalar and vector function spaces
     Q = firedrake.FunctionSpace(mesh, family='CG', degree=degree)

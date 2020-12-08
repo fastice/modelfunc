@@ -1,5 +1,5 @@
 import firedrake
-from utilities import myerror
+from modelfunc.myerror import myerror
 import os
 
 
@@ -26,6 +26,7 @@ def getCheckPointVars(checkFile, varNames, Q, t=None):
     myVars = {}
     if not os.path.exists(f'{checkFile}.h5'):
         myerror(f'getCheckPointVar: file {checkFile}.h5 does not exist')
+    # Open file and read variables
     with firedrake.DumbCheckpoint(checkFile, mode=firedrake.FILE_READ) as chk:
         if t is not None:
             # note this only works for integer years

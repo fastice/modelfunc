@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Fri Aug 14 08:44:51 2020
-
 @author: ian
 """
-import utilities as u
 import numpy as np
+from modelfunc.myStrip import myStrip
 
 
 def readProfile(profileFile, testVar):
@@ -35,7 +32,7 @@ def readProfile(profileFile, testVar):
         Distance alogn profile in km.
 
     '''
-    xyProf = u.strip(profileFile)  # read file
+    xyProf = myStrip(profileFile)  # read file
     # Compute distance along profile
     i = 0
     xyEdited = []

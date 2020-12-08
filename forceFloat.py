@@ -1,10 +1,8 @@
-import rasterio
 import icepack
 import firedrake
-import utilities as u
-from modelfunc import firedrakeSmooth, flotationMask, flotationHeight
-from icepack.constants import ice_density as rhoI, water_density as rhoW
-import os
+from modelfunc import flotationMask, flotationHeight
+from icepack.constants import ice_density as rhoI
+
 
 rhoW = rhoI * 1028./917.  # This ensures rhoW based on 1028
 
@@ -20,7 +18,7 @@ def forceFloat(floatingMask, bedElevation, sufaceElevation, Q, headRoom=50):
     sufaceElevation : firedrake function
         Surface elevation ice equivalent
     Q : firedrake function space
-        Domain    
+        Domain
     """
     nItMax = 20
     newBed = bedElevation.copy(deepcopy=True)
@@ -30,17 +28,14 @@ def forceFloat(floatingMask, bedElevation, sufaceElevation, Q, headRoom=50):
     while i < nItMax:
         zF = flotationHeight(newBed, Q, rhoI=rhoI, rhoW=rhoW)
         currentFlotation, _ = flotationMask(sufaceElevation, zF, Q, rhoI=rhoI,
-            rhoW=rhoW)
-        print(i)
-        notFloating = firedrake.And(currentFlotation < firedrake.Constant(0.5), floatingMask > 0.5)  
+                                            rhoW=rhoW)
+        notFloating = firedrake.And(currentFlotation < firedrake.Constant(0.5),
+                                    floatingMask > 0.5)
         area = firedrake.assemble(notFloating * firedrake.dx)
         newBed = icepack.interpolate(newBed - dZ * notFloating, Q)
         print(i, area/1e6)
         if area < 1:
             break
-        
         i = i + 1
     newBed = icepack.interpolate(newBed - headRoom * floatingMask, Q)
     return newBed
-        
-    #

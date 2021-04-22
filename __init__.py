@@ -5,7 +5,7 @@ __all__ = ['argusMesh', 'argusToFiredrakeMesh', 'divMelt', 'firedrakeSmooth',
            'gMesh', 'inputMeltParams', 'myerror', 'piecewiseWithDepth',
            'myStrip',
            'readModelParams', 'reduceNearGLBeta', 'readProfile',
-           'schoofFriction', 'setupMesh',  'viscosityTheta',
+           'schoofFriction', 'setupMesh',  'viscosityTheta', 'velocityError',
            'weertmanFriction']
 from modelfunc.argusMesh import argusMesh
 # from modelfunc.shpDomain import shpDomain
@@ -31,5 +31,6 @@ from modelfunc.readProfile import readProfile
 from modelfunc.slidingAndViscosity import schoofFriction
 from modelfunc.setupMesh import setupMesh
 from modelfunc.myStrip import myStrip
+from modelfunc.velocityError import velocityError
 from modelfunc.slidingAndViscosity import viscosityTheta
 from modelfunc.slidingAndViscosity import weertmanFriction

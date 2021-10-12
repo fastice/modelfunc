@@ -20,7 +20,8 @@ def inputMeltParams(meltParams):
     return meltParams
 
 
-def piecewiseWithDepth(h, floating, meltParams, Q, *argv, **kwargs):
+def piecewiseWithDepth(h, floating, meltParams, Q, *argv, returnScale=False,
+                       **kwargs):
     """ Melt function that is described piecewise by set of polynomials
     Melt is in units of m/yr w.e.
     Parameters
@@ -31,6 +32,8 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv, **kwargs):
         floating mask
     meltParams : dict
         parameters for melt function
+    Q firedrake function space
+    returnScale return scale factor too (optional)
     Returns
     -------
     firedrake function
@@ -77,6 +80,8 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv, **kwargs):
         scale = firedrake.Constant(1.)
     #
     melt = icepack.interpolate(melt1 * scale * floating, Q)
+    if returnScale:
+        return melt, scale
     return melt
 
 

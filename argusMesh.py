@@ -27,7 +27,7 @@ class argusMesh:
         self.nodeOnBoundary, self.elOnBoundary = [False], [False]
         self.shelfFrontNode = [False]
         self.segments = []
-        self.nodeType = []
+        self.nodeType = [0]
         if expFile is not None:
             self.readExp(expFile)
 
@@ -51,6 +51,7 @@ class argusMesh:
         ''' Parse nodal values from argus exp file'''
         nodesRead = 0
         nodeIndex = len(self.nodeIndex)  # WIth zero filled, will start with 1
+        print('parseNodes')
         for line in fpExp:
             if line.isspace():  # Skip blank lines
                 continue
@@ -65,18 +66,26 @@ class argusMesh:
                                         for i in range(self.nNVal)])
                 self.nodeIndex.append(nodeIndex)  # Inct node index and append
                 # I need to add a type field for multiple domain boundaries
-                self.nodeType.append(1)
+                if len(pieces) <= 8:
+                    self.nodeType.append(1)
+                else:
+                    self.nodeType.append(int(pieces[8]))
                 nodeIndex += 1
                 nodesRead += 1  # Increment node counter
                 if nodesRead == nNewNodes:
-                    # print(f'Read {nodesRead} nodes')
-                    # print(f'Node on boundary {np.sum(self.nodeOnBoundary)}')
                     self.nNodes += nodesRead
                     self.nodes = np.array(self.nodes)
                     self.nodeOnBoundary = np.array(self.nodeOnBoundary)
-                    return nodesRead
+                    self.nodeType = np.array(self.nodeType)
+                    print(self.nodeType.shape, self.nodeOnBoundary.shape)
+                    break
+
+        self.uniqueNodeTypes = np.unique(self.nodeType)[1:]
+        print(self.uniqueNodeTypes)
         if nodesRead != self.nNodes:
             myerror(f'Expected {nNewNodes} nodes but only read {nodesRead}')
+        self.nodeIndex = np.array(self.nodeIndex)
+        return nodesRead
 
     def parseElements(self, fpExp, nNewElements):
         ''' Parse Elements from an Argus export file. '''
@@ -95,7 +104,6 @@ class argusMesh:
                 elementsRead += 1
                 elementIndex += 1
                 if elementsRead == nNewElements:
-                    # print(f'Read {elementsRead} elements')
                     self.nElements += elementsRead
                     self.elements = np.array(self.elements)
                     return elementsRead
@@ -115,7 +123,7 @@ class argusMesh:
         nNewNodes, nNewElements = self.parseHeader(fpExp)
         nodesRead = self.parseNodes(fpExp, nNewNodes)
         elementsRead = self.parseElements(fpExp, nNewElements)
-        # print(nodesRead, self.nNodes, elementsRead, self.nElements)
+        print(nodesRead, self.nNodes, elementsRead, self.nElements)
         fpExp.close()
         return
 
@@ -137,15 +145,51 @@ class argusMesh:
         else:
             return self.nodeType[n1]  # Both grounded, use type
 
+    def minDistance(self, nodes):
+        '''
+        For list of node indices, find pair with minimum distances
+        '''
+        minD = 1e9
+        for ni in nodes:
+            otherNodes = np.array([x for x in nodes if x != ni])
+            d = np.array((self.nodes[otherNodes, 0] - self.nodes[ni, 0])**2 +
+                         (self.nodes[otherNodes, 1] - self.nodes[ni, 1])**2)
+            #
+            if np.min(d) < minD:
+                n1 = ni
+                n2 = otherNodes[np.where(d == min(d))[0][0]]
+                minD = np.min(d)
+        return n1, n2
+
     def boundarySegments(self):
-        ''' fine line segments on boundaries. Need to modify to handle
+        self.timesUsed = np.zeros(self.nodes.shape[0])
+        for segType in self.uniqueNodeTypes:
+            self.boundarySegmentType(segType)
+        #
+        # Now close up contours where nodes have not been used in 2 segments
+        while True:
+            usedOnce = self.nodeIndex[self.timesUsed == 1]
+            # Quit when run out of usedOnce
+            if len(usedOnce) < 2:
+                break
+            n1, n2 = self.minDistance(usedOnce)
+            self.timesUsed[n1] += 1
+            self.timesUsed[n2] += 1
+            segType = self.typeSegment(n1, n2)
+            self.segments.append({'n1': n1, 'n2': n2, 'type': segType})
+
+    def boundarySegmentType(self, segType):
+        ''' find line segments on boundaries. Need to modify to handle
         multiple  polygons'''
         # Boundary nodes
-        bNodes = np.copy(self.nodes[self.nodeOnBoundary])
-        nIndex = np.array(self.nodeIndex)[self.nodeOnBoundary]  # Boundary ind
+        segTypeNodes = np.logical_and(self.nodeType == segType,
+                                      self.nodeOnBoundary)
+
+        bNodes = np.copy(self.nodes[segTypeNodes])
+        nIndex = np.array(self.nodeIndex)[segTypeNodes]  # Boundary ind
         bIndex = np.arange(0, bNodes.shape[0])  # Index into nIndex
         bNotUsed = np.ones(bNodes.shape[0], dtype=bool)  # Nodes not yet used
-        bNotUsed[0] = False
+        bNotUsed[0] = False  # Start with first index
         n0 = nIndex[0]
         nLast = n0
         # Loop to find nearest node and form segments
@@ -155,7 +199,22 @@ class argusMesh:
                                   bIndex)
             segType = self.typeSegment(nLast, n0)
             self.segments.append({'n1': nLast, 'n2':  n0, 'type': segType})
+            # Track number of times each node used in segment
+            self.timesUsed[nLast] += 1
+            self.timesUsed[n0] += 1
             nLast = n0
+
+    def plotSegments(self, ax):
+        ''' Plot boundary segments '''
+        self.computeIDColors()
+        #
+        self.boundarySegments()
+        #
+        for segment in self.segments:
+            node1 = self.nodes[segment['n1']]
+            node2 = self.nodes[segment['n2']]
+            ax.plot([node1[0], node2[0]], [node1[1], node2[1]], '-',
+                    color=self.cTable[f'{segment["type"]}'])
 
     def meshLim(self):
         ''' Return minx,maxx,miny,maxy of domain outline '''
@@ -163,25 +222,46 @@ class argusMesh:
         ymin, ymax = np.min(self.nodes[1:, 1]), np.max(self.nodes[1:, 1])
         return xmin, xmax, ymin, ymax
 
+    def computeIDColors(self):
+        nUnique = len(self.uniqueNodeTypes)
+        myColors = plt.cm.get_cmap('jet', nUnique*2)
+        self.cTable = {'0': (0, 0, 0, 0)}
+        for x, y in zip(self.uniqueNodeTypes, range(0, nUnique)):
+            self.cTable[str(x)] = myColors(y)
+            self.cTable[str(x+100)] = myColors(y + nUnique)
+        #
+        self.IDColors = np.array([self.cTable[f'{x}'] for x in self.nodeType])
+
     def plotMesh(self, nodes=True, elements=True, nodeOnBoundary=True,
                  shelfFrontNode=True, ax=None):
         ''' plot mesh  - very slow mostly for debugging'''
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         # Plot nodes
-        if nodes:
-            ax.plot(self.nodes[1:, 0], self.nodes[1:, 1], 'k.')
+
         if nodeOnBoundary:
-            ax.plot(self.nodes[self.nodeOnBoundary, 0],
-                    self.nodes[self.nodeOnBoundary, 1], 'r.')
+            self.computeIDColors()
+            for myID in self.uniqueNodeTypes:
+                toPlot = np.logical_and(self.nodeOnBoundary,
+                                        self.nodeType == myID)
+                ax.scatter(self.nodes[toPlot, 0],
+                           self.nodes[toPlot, 1], c=self.IDColors[toPlot],
+                           marker='o', label=myID, s=5)
         if shelfFrontNode:
             ax.plot(self.nodes[self.shelfFrontNode, 0],
-                    self.nodes[self.shelfFrontNode, 1], 'b.')
-        for myEl, onBoundary in zip(self.elements, self.elOnBoundary):
-            if onBoundary:
-                # print(myEl)
-                xy = self.nodes[myEl, :]
-                ax.plot(xy[:, 0], xy[:, 1], 'g-')
+                    self.nodes[self.shelfFrontNode, 1], '.', color='m',
+                    label='shelfFrontNode')
+        if nodes:
+            ax.plot(self.nodes[1:, 0], self.nodes[1:, 1], 'k.',
+                    label='Nodes', markersize=2)
+        label = 'ElOnBoundary'
+        if elements:
+            for myEl, onBoundary in zip(self.elements, self.elOnBoundary):
+                if onBoundary:
+                    xy = self.nodes[myEl, :]
+                    ax.plot(xy[:, 0], xy[:, 1], 'g-', label=label)
+                    label = None
+        ax.legend()
 
     def gmshHeader(self, gmshFile):
         ''' Open gmsh file and write header'''

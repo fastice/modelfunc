@@ -77,11 +77,11 @@ class argusMesh:
                     self.nodes = np.array(self.nodes)
                     self.nodeOnBoundary = np.array(self.nodeOnBoundary)
                     self.nodeType = np.array(self.nodeType)
-                    print(self.nodeType.shape, self.nodeOnBoundary.shape)
+                    # print(self.nodeType.shape, self.nodeOnBoundary.shape)
                     break
 
         self.uniqueNodeTypes = np.unique(self.nodeType)[1:]
-        print(self.uniqueNodeTypes)
+        # print(self.uniqueNodeTypes)
         if nodesRead != self.nNodes:
             myerror(f'Expected {nNewNodes} nodes but only read {nodesRead}')
         self.nodeIndex = np.array(self.nodeIndex)
@@ -162,6 +162,7 @@ class argusMesh:
         return n1, n2
 
     def boundarySegments(self):
+        self.segments = []
         self.timesUsed = np.zeros(self.nodes.shape[0])
         for segType in self.uniqueNodeTypes:
             self.boundarySegmentType(segType)
@@ -177,6 +178,8 @@ class argusMesh:
             self.timesUsed[n2] += 1
             segType = self.typeSegment(n1, n2)
             self.segments.append({'n1': n1, 'n2': n2, 'type': segType})
+        #
+        self.segments = sorted(self.segments, key=lambda d: d['type'])
 
     def boundarySegmentType(self, segType):
         ''' find line segments on boundaries. Need to modify to handle
@@ -204,7 +207,7 @@ class argusMesh:
             self.timesUsed[n0] += 1
             nLast = n0
 
-    def plotSegments(self, ax):
+    def plotSegments(self, ax, segType=None):
         ''' Plot boundary segments '''
         self.computeIDColors()
         #
@@ -213,8 +216,9 @@ class argusMesh:
         for segment in self.segments:
             node1 = self.nodes[segment['n1']]
             node2 = self.nodes[segment['n2']]
-            ax.plot([node1[0], node2[0]], [node1[1], node2[1]], '-',
-                    color=self.cTable[f'{segment["type"]}'])
+            if segType == None or segment["type"] == segType:
+                ax.plot([node1[0], node2[0]], [node1[1], node2[1]], '-',
+                        color=self.cTable[f'{segment["type"]}'])
 
     def meshLim(self):
         ''' Return minx,maxx,miny,maxy of domain outline '''
@@ -279,10 +283,13 @@ class argusMesh:
         ''' write segments as 1-d nodes'''
         # print(len(self.segments))
         nSegments = len(self.segments)
-        for seg, i in zip(self.segments, range(0, nSegments)):
-            print(f'{i:8} {1:3} {2:3} {seg["type"]:4} {i+1:6} '
-                  f'{seg["n1"]:6} {seg["n2"]:6}',
-                  file=fpGmsh)
+        for seg, i in zip(self.segments, range(1, nSegments+1)):
+            print(f'{i:8} {1:3} {2:3} {seg["type"]:4} {1:6} '
+                f'{seg["n1"]:6} {seg["n2"]:6}',
+                file=fpGmsh)
+            #print(f'{i:8} {1:3} {2:3} {0:3} {seg["type"]:4}  '
+            #      f'{seg["n1"]:6} {seg["n2"]:6}',
+                  
         return nSegments
 
     def writeGmshNodes(self, fpGmsh):
@@ -302,10 +309,11 @@ class argusMesh:
         nElements = self.nElements + nSegs
         print(nElements, file=fpGmsh)
         nSegments = self.writeGmshSegments(fpGmsh)
+        #print(nSegments, self.nElements, self.nElements+nSegments)
         #
         for i in range(1, self.nElements+1):
             # [rint(self.elements[i])
-            print(f'{self.elIndex[i] + nSegments:8} {2:3} 2 1 99 '
+            print(f'{self.elIndex[i] + nSegments:8} {2:3} 2 0 99 '
                   f'{"".join([f"{x:10}" for x in self.elements[i]])}',
                   file=fpGmsh)
         print('$EndElements', file=fpGmsh)

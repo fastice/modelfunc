@@ -3,7 +3,7 @@ from firedrake import inner
 import icepack
 import rasterio
 import os
-from modelfunc import myerror
+from utilities import myerror
 
 
 def getModelVelocity(baseName, Q, V, minSigma=5, maxSigma=100):
@@ -42,6 +42,7 @@ def getModelVelocity(baseName, Q, V, minSigma=5, maxSigma=100):
     # read data
     for suffix in suffixes:
         myBand = baseName.replace('*', suffix)
+        # print(myBand)
         if not os.path.exists(myBand):
             myerror(f'Velocity/error file - {myBand} - does not exist')
         rasters[suffix] = rasterio.open(myBand, 'r')

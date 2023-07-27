@@ -67,6 +67,7 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv, returnScale=False,
         melt1 = icepack.interpolate(floating * melt1, Q)
     else:
         melt1 = icepack.interpolate(melt, Q)
+    # Smooth data
     melt1 = firedrakeSmooth(melt1, alpha=alpha)
     # 'totalMelt' given renormalize melt to produce this value
     if 'totalMelt' in meltParams.keys():

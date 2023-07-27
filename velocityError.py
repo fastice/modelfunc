@@ -16,5 +16,5 @@ def velocityError(uO, uI, area, message=''):
     deltaV = uO - uI
     vError = firedrake.inner(deltaV, deltaV)
     vErrorAvg = np.sqrt(firedrake.assemble(vError * firedrake.dx) / area)
-    firedrake.PETSc.Sys.Print(f'{message} v error {vErrorAvg:10.2f} (m/yr)')
+    print(f'{message} v error {vErrorAvg:10.2f} (m/yr)')
     return vErrorAvg.item()

@@ -34,6 +34,7 @@ def readModelParams(paramsFile, key=None):
     try:
         with open(paramsFile) as fp:
             modelParams = yaml.load(fp, Loader=yaml.FullLoader)
+            # print(modelParams)
             if key is not None:
                 if key in modelParams:
                     modelParams = modelParams[key]

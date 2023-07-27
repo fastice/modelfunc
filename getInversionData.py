@@ -8,7 +8,7 @@ Created on Fri Aug 14 09:10:16 2020
 import modelfunc as mf
 
 
-def getInversionData(inversionCheckpointFile, Q, V):
+def getInversionData(inversionCheckpointFile, Q, V, mesh=None):
     '''
     Read an inversion results file and return
     betaInv, thetaInv, Ainv, sInv, hInv, zbInv, floatingInv,
@@ -22,6 +22,8 @@ def getInversionData(inversionCheckpointFile, Q, V):
         modal scalar function space.
     V : firedrake function space
         model vector function space.
+    mesh: Mesh for new checkpoint function
+    chk: Echo data to chk file
 
     Returns
     -------
@@ -49,11 +51,12 @@ def getInversionData(inversionCheckpointFile, Q, V):
     #
     inversionData = ['betaInv', 'thetaInv', 'AInv', 'sInv', 'hInv', 'zbInv',
                      'floatingInv', 'groundedInv']
-    myVars = mf.getCheckPointVars(inversionCheckpointFile, inversionData, Q)
+    myVars = mf.getCheckPointVars(inversionCheckpointFile, inversionData, Q, mesh=mesh)
     myList = [myVars[myVar] for myVar in inversionData]
     vels = mf.getCheckPointVars(inversionCheckpointFile, ['uInv', 'uObsInv'],
-                                V)
+                                V, mesh=mesh)
     myList += [vels['uInv'], vels['uObsInv']]
+    #  
     # betaInv, thetaInv, Ainv,  sInv, hInv, zbInv, floatingInv,
     # groundedInv, uInv, uObsInv
     return myList[:]

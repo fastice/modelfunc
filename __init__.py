@@ -1,6 +1,7 @@
 __all__ = ['argusMesh', 'argusToFiredrakeMesh', 'divMelt', 'firedrakeSmooth',
            'flotationHeight', 'flotationMask', 'forceFloat',
-           'getCheckPointVars', 'getInversionData', 'getModelGeometry',
+           'getCheckPointVars', 'getInversionData', 'getMeshFromCheckPoint',
+           'getModelGeometry',
            'getRateFactor', 'getModelVarFromTiff', 'getModelVelocity',
            'gMesh', 'inputMeltParams', 'myerror', 'piecewiseWithDepth',
            'myStrip',
@@ -17,6 +18,7 @@ from modelfunc.flotationMask import flotationMask
 from modelfunc.forceFloat import forceFloat
 from modelfunc.getCheckPointVars import getCheckPointVars
 from modelfunc.getInversionData import getInversionData
+from modelfunc.getMeshFromCheckPoint import getMeshFromCheckPoint
 from modelfunc.getModelGeometry import getModelGeometry
 from modelfunc.getModelGeometry import getModelVarFromTiff
 from modelfunc.getModelVelocity import getModelVelocity

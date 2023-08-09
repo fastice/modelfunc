@@ -70,7 +70,9 @@ def getNewCheckPointVars(checkFile, varNames, Q, t=None, mesh=None):
         keywords = {}
         if t is not None:
             # note this only works for integer years
+            print('t', t)
             keywords['idx'] = int(t-1)
+        print(keywords)
         for varName in varNames:
             myVars[varName] = chk.load_function(mesh, varName, **keywords)
     return myVars

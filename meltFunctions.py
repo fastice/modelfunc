@@ -21,6 +21,7 @@ def inputMeltParams(meltParams):
 
 
 def piecewiseWithDepth(h, floating, meltParams, Q, *argv, returnScale=False,
+                       meltRegions=None,
                        **kwargs):
     """ Melt function that is described piecewise by set of polynomials
     Melt is in units of m/yr w.e.
@@ -34,6 +35,7 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv, returnScale=False,
         parameters for melt function
     Q firedrake function space
     returnScale return scale factor too (optional)
+    meltRegions dictionary with regional scale factors (optional)
     Returns
     -------
     firedrake function
@@ -69,24 +71,44 @@ def piecewiseWithDepth(h, floating, meltParams, Q, *argv, returnScale=False,
         melt1 = icepack.interpolate(melt, Q)
     # Smooth data
     melt1 = firedrakeSmooth(melt1, alpha=alpha)
-    # 'totalMelt' given renormalize melt to produce this value
-    if 'totalMelt' in meltParams.keys():
-        trend = 0.
-        if 'trend' in kwargs.keys():
-            trend = kwargs['trend']
-        intMelt = firedrake.assemble(melt1 * floating * firedrake.dx)
-        total = float(meltParams['totalMelt']) + trend
-        scale = firedrake.Constant(-1.0 * total/float(intMelt))
-    else:
-        scale = firedrake.Constant(1.)
+    melt = firedrake.Constant(0)
+    # This is the default region mask (all)
+    if meltRegions is None:
+        meltRegions = {'All': firedrake.Constant(1)}
     #
-    melt = icepack.interpolate(melt1 * scale * floating, Q)
+    if 'totalMelt' in meltParams.keys():
+        # 'totalMelt' given renormalize melt to produce this value
+        # Modified August 2023 to allow individual basins to be scaled
+        # independently.
+        # So loop over each region mask
+        for regionKey in meltRegions:
+            # Get the mask, which is just 1 if no region
+            regionScale = meltRegions[regionKey]
+            trend = 0.
+            if 'trend' in kwargs.keys():
+                trend = kwargs['trend']
+            # Integrate the initial melt for the local region
+            intMelt = firedrake.assemble(regionScale * melt1 * floating *
+                                         firedrake.dx)
+            # Get the total melt
+            total = float(meltParams['totalMelt']) + trend
+            # Scale factor so integrated melt = totalMelt
+            scale = firedrake.Constant(-1.0 * total/float(intMelt))
+            # Cumulatively sum melt from different (nonoverlapping regions)
+            melt = icepack.interpolate(melt +
+                                       melt1 * regionScale * scale * floating,
+                                       Q)
+    else:
+        # Unscaled melt function
+        scale = firedrake.Constant(1.)
+        melt = icepack.interpolate(melt1 * scale * floating, Q)
+    #
     if returnScale:
         return melt, scale
     return melt
 
 
-def divMelt(h, floating, meltParams, u, Q):
+def divMelt(h, floating, meltParams, u, Q, meltRegions=None):
     """ Melt function that is a scaled version of the flux divergence
     h : firedrake function
         ice thickness
@@ -103,6 +125,8 @@ def divMelt(h, floating, meltParams, u, Q):
     firedrake function
         melt rates
     """
+    if meltRegions is not None:
+        myerror('meltRegions not implemented in divMelt')
     flux = u * h
     fluxDiv = icepack.interpolate(firedrake.div(flux), Q)
     fluxDivS = firedrakeSmooth(fluxDiv, alpha=8000)

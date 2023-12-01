@@ -36,7 +36,7 @@ def getCheckPointVars(checkFile, varNames, Q, t=None, mesh=None):
     try:
         return getNewCheckPointVars(checkFile, varNames, Q, t=t, mesh=mesh)
     except Exception:
-        myerror(f'Could not read checkpoint file {checkFile}')
+        myerror(f'Could not read new checkpoint file {checkFile}')
     return None
 
 
@@ -64,15 +64,16 @@ def getNewCheckPointVars(checkFile, varNames, Q, t=None, mesh=None):
         # Try mesh in file, otherwise use function space mesh
         if mesh is None:
             try:
-                mesh = chk.load_mesh()
+                #mesh = chk.load_mesh()
+                mesh = Q.mesh()
             except Exception:
                 myerror(f"Could not load mesh from checkFile: {checkFile}")
         keywords = {}
         if t is not None:
             # note this only works for integer years
-            print('t', t)
+            #print('t', t)
             keywords['idx'] = int(t-1)
-        print(keywords)
+        #print(keywords)
         for varName in varNames:
             myVars[varName] = chk.load_function(mesh, varName, **keywords)
     return myVars

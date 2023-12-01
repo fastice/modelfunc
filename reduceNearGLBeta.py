@@ -28,9 +28,10 @@ def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
     # Current height above flotation with negative values zeroed out.
     sAbove = firedrake.max_value((s - zF) * grounded, 0)
     # mask so only areas less than thresh but grounded
+    # This is the area below hT
     sMask = (sAbove < thresh) * grounded
     # print(f'{sAbove.dat.data_ro.min()}, {sAbove.dat.data_ro.max()} {thresh}')
-    # Inverse mask
+    # Inverse mask (the area above hT)
     sMaskInv = sMask < 1
     # scale = fraction of original height above flotation
     # Use 5 to avoid potentially large ratio at small values.

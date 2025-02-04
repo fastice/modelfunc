@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "utilities"
+name = "modelfunc"
 version = "0.0.1"
-description = "Utilities for fastice"
+description = "Modelfunc for fastice"
 authors = [
     { name = "Ian Joughin", email = "irj@uw.edu" }
 ]
@@ -15,11 +15,11 @@ keywords = ["SAR", "NISAR", "GrIMP"]
 requires-python = ">=3.8"
 
 [tool.setuptools]
-packages = ["utilities"]
+packages = ["modelfunc"]
 
 [project.urls]
-Homepage = "https://github.com/fastice/utilities"
-Repository = "https://github.com/fastice/utilities"
+Homepage = "https://github.com/fastice/modelfunc"
+Repository = "https://github.com/fastice/modelfunc"
 
 [project.scripts]
 

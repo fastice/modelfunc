@@ -32,7 +32,8 @@ class CheckpointFileNFS(CheckpointFile):
         self.originalFile = args[0]
         #
         if args[1] == 'a':
-            shutil.copy(self.originalFile, self.tempFile)
+            if os.path.exists(self.originalFile):
+                shutil.copy(self.originalFile, self.tempFile)
         #
         # Make a link so file visible during along run
         self.removeOriginal()

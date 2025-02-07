@@ -37,6 +37,7 @@ class CheckpointFileNFS(CheckpointFile):
         #
         # Make a link so file visible during along run
         self.removeOriginal()
+        print('CWD', os.getcwd())
         print(f'linking {self.tempFile} {self.originalFile}')
         os.symlink(self.tempFile, self.originalFile)
         # modify args to use the tmp file

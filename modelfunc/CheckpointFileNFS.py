@@ -9,6 +9,7 @@ Created on Fri Feb  7 10:07:12 2025
 from firedrake import CheckpointFile
 import shutil
 import tempfile
+import os
 
 class CheckpointFileNFS(CheckpointFile):
     '''
@@ -19,19 +20,36 @@ class CheckpointFileNFS(CheckpointFile):
     code file system agnostic.
     '''
     def __init__(self, *args, tmpDir="/var/tmp", **kwargs):
-        # Create a temporary file name in for /far/tmp
-        TF = tempfile.NamedTemporaryFile(dir="/var/tmp", delete=False)  # Set delete=False if you want to keep it
-        TF.close()
+        # Create a temporary file name in for /var/tmp
+        if args[1] == 'r':
+            self.tempFile = None
+            super().__init__(*args, **kwargs)
+            return
         #
+        TF = tempfile.NamedTemporaryFile(dir="/var/tmp", delete=False)
+        TF.close()
         self.tempFile = TF.name
+        self.originalFile = args[0]
+        #
+        if args[1] == 'a':
+            shutil.copy(self.originalFile, self.tempFile)
+        #
+        # Make a link so file visible during along run
+        self.removeOriginal()
+        os.symlink(self.tempFile, self.originalFile)
+        # modify args to use the tmp file
         newArgs = [self.tempFile, *args[1:]]
         # CheckpointFile init
-        super().__init__(*newArgs, **kwargs)
-        # save the original name
-        self.originalFile = args[0]
+        super().__init__(*newArgs, **kwargs)   
 
+    def removeOriginal(self):
+        if os.path.exists(self.originalFile):
+            os.remove(self.originalFile)
+            
     def close(self, *args, **kwargs):
         # Call the original close method
         super().close(*args, **kwargs)
         # move the tmp file to the desired location
-        shutil.move(self.tempFile, self.originalFile)
+        if self.tempFile is not None:
+            self.removeOriginal()
+            shutil.move(self.tempFile, self.originalFile)

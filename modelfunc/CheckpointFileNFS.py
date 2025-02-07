@@ -33,12 +33,8 @@ class CheckpointFileNFS(CheckpointFile):
         #
         if args[1] == 'a':
             if os.path.exists(self.originalFile):
-                shutil.copy(self.originalFile, self.tempFile)
-        #
-        # Make a link so file visible during along run
-        self.removeOriginal()
-        print('CWD', os.getcwd())
-        print(f'linking {self.tempFile} {self.originalFile}')
+                shutil.move(self.originalFile, self.tempFile)
+        # Create link to track progress
         os.symlink(self.tempFile, self.originalFile)
         # modify args to use the tmp file
         newArgs = [self.tempFile, *args[1:]]
@@ -46,9 +42,7 @@ class CheckpointFileNFS(CheckpointFile):
         super().__init__(*newArgs, **kwargs)   
 
     def removeOriginal(self):
-        print(f'Remove Original: {self.originalFile} {os.path.exists(self.originalFile)}')
         if os.path.exists(self.originalFile):
-            print(f'Removing {self.originalFile}')
             os.remove(self.originalFile)
             
     def close(self, *args, **kwargs):

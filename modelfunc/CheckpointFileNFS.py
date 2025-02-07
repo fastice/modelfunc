@@ -45,6 +45,7 @@ class CheckpointFileNFS(CheckpointFile):
         super().__init__(*newArgs, **kwargs)   
 
     def removeOriginal(self):
+        print(f'Remove Original: {self.originalFile} {os.path.exists(self.originalFile)}')
         if os.path.exists(self.originalFile):
             print(f'Removing {self.originalFile}')
             os.remove(self.originalFile)

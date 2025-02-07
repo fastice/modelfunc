@@ -1,4 +1,5 @@
-__all__ = ['argusMesh', 'argusToFiredrakeMesh', 'divMelt', 'firedrakeSmooth',
+__all__ = ['argusMesh', 'argusToFiredrakeMesh', 'CheckpointFileNFS',
+           'divMelt', 'firedrakeSmooth',
            'flotationHeight', 'flotationMask', 'forceFloat',
            'getCheckPointVars', 'getNewCheckPointVars',
            'getInversionData', 'getMeshFromCheckPoint',
@@ -12,6 +13,7 @@ __all__ = ['argusMesh', 'argusToFiredrakeMesh', 'divMelt', 'firedrakeSmooth',
 from modelfunc.argusMesh import argusMesh
 # from modelfunc.shpDomain import shpDomain
 from modelfunc.argusToFiredrakeMesh import argusToFiredrakeMesh
+from modelfunc.CheckpointFileNFS import CheckpointFileNFS
 from modelfunc.meltFunctions import divMelt
 from modelfunc.firedrakeSmooth import firedrakeSmooth
 from modelfunc.flotationHeight import flotationHeight

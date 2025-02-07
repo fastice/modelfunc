@@ -36,6 +36,7 @@ class CheckpointFileNFS(CheckpointFile):
         #
         # Make a link so file visible during along run
         self.removeOriginal()
+        print(f'linking {self.tempFile} {self.originalFile}')
         os.symlink(self.tempFile, self.originalFile)
         # modify args to use the tmp file
         newArgs = [self.tempFile, *args[1:]]
@@ -44,6 +45,7 @@ class CheckpointFileNFS(CheckpointFile):
 
     def removeOriginal(self):
         if os.path.exists(self.originalFile):
+            print(f'Removing {self.originalFile}')
             os.remove(self.originalFile)
             
     def close(self, *args, **kwargs):

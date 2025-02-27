@@ -1,5 +1,7 @@
 import firedrake
+import icepack
 from icepack.constants import ice_density as rhoI, water_density as rhoW
+
 
 rhoW = rhoI * 1028./917.  # This ensures rhoW based on 1028
 
@@ -23,5 +25,5 @@ def flotationHeight(zb, Q, rhoI=rhoI, rhoW=rhoW):
         Flotation height (m)
     """
     # computation for height above flotation
-    zF = firedrake.interpolate(firedrake.max_value(-zb * (rhoW/rhoI-1), 0), Q)
+    zF = icepack.interpolate(firedrake.max_value(-zb * (rhoW/rhoI-1), 0), Q)
     return zF

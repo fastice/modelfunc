@@ -150,11 +150,12 @@ class argusMesh:
         For list of node indices, find pair with minimum distances
         '''
         minD = 1e9
-        for ni in nodes:     
+        for ni in nodes: 
             otherNodes = np.array([x for x in nodes if x != ni])
             d = np.array((self.nodes[otherNodes, 0] - self.nodes[ni, 0])**2 +
                          (self.nodes[otherNodes, 1] - self.nodes[ni, 1])**2)
-            #
+            #d
+            #print(np.min(d))
             if np.min(d) < minD:
                 n1 = ni
                 n2 = otherNodes[np.where(d == min(d))[0][0]]
@@ -171,15 +172,16 @@ class argusMesh:
         while True:
             usedOnce = self.nodeIndex[self.timesUsed == 1]
             # Quit when run out of usedOnce
+            #print(usedOnce)
             if len(usedOnce) < 2:
                 break
+            #print(usedOnce)
             n1, n2 = self.minDistance(usedOnce)
             self.timesUsed[n1] += 1
             self.timesUsed[n2] += 1
             segType = self.typeSegment(n1, n2)       
             self.segments.append({'n1': n1, 'n2': n2, 'type': segType})
         #
-        # print(self.segments)
         self.segments = sorted(self.segments, key=lambda d: d['type'])
 
     def boundarySegmentType(self, segType):

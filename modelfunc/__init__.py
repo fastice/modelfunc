@@ -2,13 +2,14 @@ __all__ = ['argusMesh', 'argusToFiredrakeMesh', 'CheckpointFileNFS',
            'divMelt', 'firedrakeSmooth',
            'flotationHeight', 'flotationMask', 'forceFloat',
            'getCheckPointVars', 'getNewCheckPointVars',
-           'getInversionData', 'getMeshFromCheckPoint',
+           'getInversionData', 'getFrictionLaw', 'getMeshFromCheckPoint',
            'getModelGeometry',
            'getRateFactor', 'getModelVarFromTiff', 'getModelVelocity',
            'gMesh', 'inputMeltParams', 'myerror', 'piecewiseWithDepth',
-           'myStrip',
+           'myStrip', 'printExtremes',
            'readModelParams', 'reduceNearGLBeta', 'readProfile',
-           'schoofFriction', 'setupMesh',  'viscosityTheta', 'velocityError',
+           'schoofFriction', 'setupMesh',  'taperedViscosityIS',
+           'viscosityTheta', 'velocityError',
            'weertmanFriction']
 from modelfunc.argusMesh import argusMesh
 # from modelfunc.shpDomain import shpDomain
@@ -31,12 +32,15 @@ from modelfunc.gMesh import gMesh
 from modelfunc.meltFunctions import inputMeltParams
 from modelfunc.meltFunctions import piecewiseWithDepth
 from modelfunc.myerror import myerror
+from modelfunc.printExtremes import printExtremes
 from modelfunc.readModelParams import readModelParams
 from modelfunc.reduceNearGLBeta import reduceNearGLBeta
 from modelfunc.readProfile import readProfile
 from modelfunc.slidingAndViscosity import schoofFriction
+from modelfunc.slidingAndViscosity import taperedViscosityIS
 from modelfunc.setupMesh import setupMesh
 from modelfunc.myStrip import myStrip
 from modelfunc.velocityError import velocityError
+from modelfunc.slidingAndViscosity import getFrictionLaw
 from modelfunc.slidingAndViscosity import viscosityTheta
 from modelfunc.slidingAndViscosity import weertmanFriction

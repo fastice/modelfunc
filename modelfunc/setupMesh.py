@@ -25,7 +25,7 @@ def setupMesh(meshFile, degree=2, meshOversample=None, savegmsh=False,
     # Input the mesh
     maxOversample = 4  # Arbitrary could be increased
     mesh1, opts = argusToFiredrakeMesh(meshFile, savegmsh=savegmsh)
-
+    print('1')
     if meshOversample is not None and newMesh is None:
         numLevels = meshOversample - 1
         if numLevels < 0 or numLevels > (maxOversample-1):
@@ -35,7 +35,7 @@ def setupMesh(meshFile, degree=2, meshOversample=None, savegmsh=False,
     # Create scalar and vector function spaces
     if newMesh is not None:
         mesh = newMesh
-        #myerror("stop")
+        # myerror("stop")
     else:
         mesh = mesh1
     # print(type(newMesh))

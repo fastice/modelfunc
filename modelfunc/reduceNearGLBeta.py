@@ -2,7 +2,8 @@ import icepack
 import firedrake
 
 
-def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
+def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False, 
+                     linear=False):
     """Compute beta reduction in area near grounding line where the height
     above floation is less than thresh.
 
@@ -20,6 +21,8 @@ def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
         scaler function space for model
     thresh : float
         Threshold to determine where to reduce beta (zAbove < thresh)
+    linear : Boolean, optional
+        Don't take sqrt of scale factor
     """
     # compute original height above flotation for grounded region
     sAboveOrig = (sOrig - zF) * grounded
@@ -44,6 +47,9 @@ def reduceNearGLBeta(s, sOrig, zF, grounded, Q, thresh, limit=False):
     # sqrt so tau = scale * beta^2
     # scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta) * grounded, Q)
     # Removed grounded above because grounded is always applied in friction
-    scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta), Q)
+    if linear:
+        scaleBeta = icepack.interpolate(scaleBeta, Q)
+    else:
+        scaleBeta = icepack.interpolate(firedrake.sqrt(scaleBeta), Q)
     # print(f'{scaleBeta.dat.data_ro.min()}, {scaleBeta.dat.data_ro.max()}')
     return scaleBeta
